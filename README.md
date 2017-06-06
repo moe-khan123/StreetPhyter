@@ -26,4 +26,11 @@ Neutral jump, forward jump, backward jump, standing hard punch and all the kick 
 
 
 
+
+How to run locally:
+http://phaser.io/tutorials/getting-started
+
+
+
+
 Credits to Capcom for the inspiration and the sprites.
