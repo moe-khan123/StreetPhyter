@@ -1,21 +1,22 @@
 var game = new Phaser.Game(621, 224, Phaser.CANVAS, 'phaser-example',
-{
-    preload: preload,
-    create: create,
-    update: update,
-    render: render
-});
+    {
+        preload: preload,
+        create: create,
+        update: update,
+        render: render
+    });
 
 
 function render() {
 
+    //game.debug.body(playerKen);
+    //game.debug.body(enemyBison);
 
-  //  game.debug.spriteBounds(playerKen);
+
 
 }
 
-function preload()
-{
+function preload() {
 
     game.load.spritesheet('kennewsprites', 'src/sprites/kennewsprites.png', 76, 101, 48);
     game.load.spritesheet('mbisonsprites', 'src/sprites/mbisonspritesheet.png', 65, 95, 48);
@@ -46,6 +47,7 @@ var fierceKickInput;
 var kenAttacking;
 var kenIdle;
 var kenBlocking;
+var kenRecovery;
 
 var bisonAttacking;
 var bisonIdle;
@@ -54,7 +56,7 @@ var bisonBlocking;
 //Enemy Code:
 var enemyBison;
 var time_til_spawn;
-var last_spawn_time; 
+var last_spawn_time;
 
 //Hitbox
 var hitBoxes;
@@ -67,15 +69,40 @@ var mBisonCollisionGroup;
 
 
 //Player health:
-var healthKen ;
-var healthBison ;
+var healthKen;
+var healthBison;
 
-function create()
-{
+
+//Sizes Ken:
+var standingHitBoxWidthKen;
+var standingHitBoxHeightKen;
+var lightPunchWidthKen;
+var mediumPunchWidthKen;
+
+//Sizes Bison:
+var standingHitBoxWidthBison;
+var standingHitBoxHeightBison;
+var lightPunchWidthBison;
+var mediumPunchWidhBison;
+
+//Misc: 
+var inputString;
+var inputArray;
+var lastLeftInput;
+var lastRightInput;
+var lastDownInput;
+var lastLightPunchInput;
+var lastMediumPunchInput;
+
+
+function create() {
+    inputString = "";
+    inputArray = [];
+
     healthKen = 100;
-     healthBison = 100;
-     console.log(healthBison);
-   
+    healthBison = 100;
+    console.log(healthBison);
+
 
     kenIdle = true;
     kenAttacking = false;
@@ -86,60 +113,28 @@ function create()
     bisonAttacking = false;
     bisonBlocking = false;
 
+    standingHitBoxWidthKen = 30;
+    standingHitBoxHeightKen = 60;
+    lightPunchWidthKen = 40;
+    mediumPunchWidthKen = 60;
 
-  
-    
+    standingHitBoxWidthBison = 30;
+    standingHitBoxHeightBison = 60;
+    lightPunchWidthBison = 60;
+    mediumPunchWidhBison = 60;
+
+
     renderSprites();
     playerKenSpritesLoad();
     enemyBisonSpritesLoad();
     inputDeclarations();
 
- 
-
-    game.physics.startSystem(Phaser.Physics.P2JS);
- 
-
-    //  Turn on impact events for the world, without this we get no collision callbacks
-    game.physics.p2.setImpactEvents(true);
-    game.physics.p2.restitution = 0.8;
 
 
-    //  Create our collision groups. One for the player, one for the enemy
-     kenCollisionGroup = game.physics.p2.createCollisionGroup();
-     mBisonCollisionGroup = game.physics.p2.createCollisionGroup();
-
-    //  This part is vital if you want the objects with their own collision groups to still collide with the world bounds
-    //  (which we do) - what this does is adjust the bounds to use its own collision group.
-    game.physics.p2.updateBoundsCollisionGroup();
-
-    
-    game.physics.p2.enable(playerKen, true); //set to false if i want to get rid of the hitbox. 
-    playerKen.body.setRectangle(20, 80, -15);
-
-     playerKen.body.fixedRotation = true;
-    
-     
-    playerKen.body.fixedRotation = true;
-    playerKen.body.setCollisionGroup(kenCollisionGroup);
-
-    //  Ken will collide with the enemy, and when it strikes one the hitPanda callback will fire, causing it to alpha out a bit
-    //  When enemy collide with each other, nothing happens to them.
-     playerKen.body.collides(mBisonCollisionGroup, hitEnemy, this);
-
-
-
-
-
-    game.physics.p2.enable(enemyBison, true); //set to false if i want to get rid of the hitbox. 
-
-    //  Tell the enemy to use the mBisonCollisionGroup
-    enemyBison.body.setRectangle(40, 40, -15);  
-    //enemyBison.body.kinematic = true;
-   enemyBison.body.setCollisionGroup(mBisonCollisionGroup);  
-   enemyBison.body.collides([mBisonCollisionGroup, kenCollisionGroup]);
-   enemyBison.body.fixedRotation = true;
-   
-
+    game.physics.startSystem(Phaser.Physics.ARCADE); //game.physics.startSystem(Phaser.Physics.P2JS);
+    game.physics.arcade.enable([playerKen, enemyBison], Phaser.Physics.ARCADE, true);
+    playerKen.body.setSize(standingHitBoxWidthKen, standingHitBoxHeightKen);
+    enemyBison.body.setSize(standingHitBoxWidthBison, standingHitBoxHeightBison);
 
 
 }
@@ -147,30 +142,37 @@ function create()
 
 
 
-function hitEnemy(body1, body2) {  
+function hitEnemy(body1, body2) {
 
 
-    if (kenAttacking)
-        {
-    healthBison = healthBison - body1.sprite.damage;
-    console.log('Bison Health: ' + healthBison);
+    if (kenAttacking) {
+        healthBison = healthBison - body1.damage;
+        console.log('Bison Health: ' + healthBison);
     }
 
 
-    if (bisonAttacking)
-    {
-        healthKen = healthKen - body2.sprite.damage;
+    if (bisonAttacking) {
+        healthKen = healthKen - body2.damage;
         console.log('Ken Health: ' + healthKen);
     }
-
-
-
-    if (healthBison <= 0)
-    {
-        console.log('died');
+    else {
+        console.log('else statement');
+        enemyBison.body.velocity.x = 0;
     }
-    
-   
+
+
+
+    if (healthBison <= 0) {
+        console.log('died');
+        enemyBison.destroy();
+    }
+
+    if (healthKen <= 0) {
+        playerKen.destroy();
+
+    }
+
+
 }
 
 function renderSprites() {
@@ -180,11 +182,10 @@ function renderSprites() {
     backgroundImage.smoothed = false;
     enemyBison = game.add.sprite(500, YValueBlankaLevel, 'mbisonsprites');
     playerKen = game.add.sprite(300, YValueBlankaLevel, 'kennewsprites');
-    
+
 }
 
-function playerKenSpritesLoad()
-{
+function playerKenSpritesLoad() {
     //Standing:
     playerKen.animations.add('standing', [0, 1, 2, 3]);
     playerKen.animations.add('walkingforward', [4, 5, 6]);
@@ -207,22 +208,20 @@ function playerKenSpritesLoad()
     playerKen.animations.add('neutralJump', [36, 37, 38, 39, 40, 41, 42]);
 }
 
-function enemyBisonSpritesLoad()
-{
+function enemyBisonSpritesLoad() {
     //standing
     enemyBison.animations.add('standing', [0, 1, 2]);
     enemyBison.animations.add('walkingforward', [5, 4, 3, 6]);
-    enemyBison.animations.add('walkingbackward',[4, 5, 6]);
+    enemyBison.animations.add('walkingbackward', [4, 5, 6]);
 
     enemyBison.animations.add('crouching', [7]);
     enemyBison.animations.add('standingLightPunch', [8, 9, 10, 11]);
-    enemyBison.animations.add('standingMediumPunch', [12,13,14,15,16,17,18,19]);
+    enemyBison.animations.add('standingMediumPunch', [12, 13, 14, 15, 16, 17, 18, 19]);
 
 
 }
 
-function inputDeclarations()
-{
+function inputDeclarations() {
     cursors = game.input.keyboard.createCursorKeys();
     lightPunchInput = game.input.keyboard.addKey(Phaser.Keyboard.Q);
     mediumPunchInput = game.input.keyboard.addKey(Phaser.Keyboard.W);
@@ -235,16 +234,63 @@ function inputDeclarations()
 }
 
 
-function update()
-{
- 
-   
+function update() {
+
     inputHandlers();
-
     enemyAI();
-
+    inputTracker();
+    specialMovesTracker();
 
 }
+
+function inputTracker() {
+    if (cursors.left.downDuration(1)) {
+        inputString += "L";
+    }
+    else if (cursors.right.downDuration(1)) {
+        inputString += "R";
+    }
+    else if (cursors.down.downDuration(1)) {
+        inputString += "D";
+    }
+    else if (mediumPunchInput.downDuration(1)) {
+        inputString += "[MP]";
+    }
+    else if (lightPunchInput.downDuration(1)) {
+        inputString += "[LP]";
+
+    }
+
+}
+var hadoukenTime = [];
+function specialMovesTracker() {
+    if (inputString.includes("DR[LP]")) {
+        console.log((lastLightPunchInput - lastDownInput));
+        if ((lastLightPunchInput - lastDownInput) < 0.44425) {
+            console.log('hadouken');
+            inputString = "";
+        }
+        else {
+            inputString = "";
+            console.log('Do not do hadouken, users inputs are too slow.');
+        }
+    }
+    else if (inputString.includes("DRD[LP]")) //Shoryuken (Dragon Punch)
+    {
+
+
+        if ((lastDownInput - lastLightPunchInput) < 1.5) {
+            console.log('shoryuken');
+            inputString = "";
+        }
+    }
+    else {
+        console.log("No Special moves detected.");
+    }
+
+}
+
+
 
 function bisonStanding() {
     enemyBison.damage = 0;
@@ -252,64 +298,43 @@ function bisonStanding() {
 
         enemyBison.body.velocity.x = 0;
         enemyBison.animations.play('standing', 7, true);
-        //console.log('standing');
 
     }
 }
 
 
 
-function bisonWalkingForward()
-{
+function bisonWalkingForward() {
     if (!bisonAttacking) {
 
-        //console.log(enemyBison.animations);
-        enemyBison.body.velocity.x = -40;
+        game.physics.arcade.moveToObject(enemyBison, playerKen.position);
         enemyBison.animations.play('walkingforward', 7, true);
+        enemyBison.body.setSize(standingHitBoxWidthBison, standingHitBoxHeightBison);
 
-        enemyBison.body.setRectangle(40, 40, -15);   //Increase the hitbox.
-        //IMPORTANT: Whenever re setting the rectangle, must call setCollionGroup
-        enemyBison.body.setCollisionGroup(mBisonCollisionGroup);
-        enemyBison.body.collides(kenCollisionGroup, hitEnemy, this);
     }
 }
 
-function bisonWalkingBackward()
-{
+function bisonWalkingBackward() {
     if (!bisonAttacking) {
         enemyBison.body.velocity.x = 1000;
         enemyBison.animations.play('walkingbackward', 7, true);
 
-        enemyBison.body.setRectangle(40, 40, -15);   //Increase the hitbox.
-        //IMPORTANT: Whenever re setting the rectangle, must call setCollionGroup
-        enemyBison.body.setCollisionGroup(mBisonCollisionGroup);
-        enemyBison.body.collides(kenCollisionGroup, hitEnemy, this);
+
     }
 }
 
-function bisonLightPunch()
-{
-    enemyBison.damage = 1;
-    enemyBison.body.setRectangle(55, 80, -18); //Increase the hitbox.
-    //IMPORTANT: Whenever re setting the rectangle, must call setCollionGroup
-    enemyBison.body.setCollisionGroup(mBisonCollisionGroup);
-    enemyBison.body.collides(kenCollisionGroup, hitEnemy, this);
+function bisonLightPunch() {
+    console.log('punching');
+    enemyBison.damage = 0.3;
+    enemyBison.body.setSize(lightPunchWidthBison, standingHitBoxHeightBison, -20);
 
     enemyBison.body.velocity.x = 0;
 
-    enemyBison.body.static = true;
     //console.log('light');
-     bisonAttacking = true;
+    bisonAttacking = true;
     enemyBison.animations.play('standingLightPunch', 10, false).onComplete.add(function () {
-        //console.log('bisonPunching');
-        //reset the graphics back
-        enemyBison.body.setRectangle(40, 40, -15);  
-
-        enemyBison.body.setCollisionGroup(mBisonCollisionGroup);
-        enemyBison.body.collides(kenCollisionGroup, hitEnemy, this);
-
-
-
+        console.log('the reset');
+        enemyBison.body.setSize(standingHitBoxWidthBison, standingHitBoxHeightBison, 0); //Putting it back to 0 after I have changed it to -20.
         bisonAttacking = false;
         enemyBison.body.velocity.x = 0;
         enemyBison.animations.play('standing', 7, true);
@@ -319,67 +344,30 @@ function bisonLightPunch()
 }
 
 
-//var time_til_spawn = Math.random() * 3000 + 2000;  //Random time between 2 and 5 seconds.
-//var last_spawn_time = game.time.time;
 
-//update() {  // This is your state's update loop
-//    var current_time = game.time.time;
-//    if (current_time - last_spawn_time > time_til_spawn) {
-//        time_til_spawn = Math.random() * 3000 + 2000;
-//        last_spawn_time = current_time;
-//        spawnCustomer();
-//    }
-//}
 
 
 var consecutivePunches = 0;
 
-function enemyAI()
-{
-   
+function enemyAI() {
+
+
+    var isColliding = game.physics.arcade.collide(playerKen, enemyBison, hitEnemy, null, this);
+
+    //   console.log(Phaser.Rectangle.intersects(playerKen.position, enemyBison.position));
+    // if (!(Phaser.Rectangle.intersects(playerKen, enemyBison))) {
+    //if (!(isColliding)){
+    //    bisonWalkingForward();      
+    //}
+    //else
+    //    {
+    //        bisonLightPunch();
+
+    //    }
 
 
 
-    //enemyBison.body.velocity.x = -50;
 
-    var distanceBetweenEnemy = Math.abs(playerKen.position.x - enemyBison.position.x);
-   // console.log('distance between enemy is ' + distanceBetweenEnemy);
-
-    if (distanceBetweenEnemy > 50) {
-        bisonWalkingForward();
-    }
-    else {
-        console.log('near');   
-
-        if (Math.floor(Math.random() * 100) + 1 > 1 && Math.floor(Math.random() * 100) + 1 <30) {
-            bisonStanding();
-        }
-        else
-        {
-          
-
-            if (consecutivePunches == 3) {
-                bisonWalkingBackward();
-                consecutivePunches = 0;
-            }
-            else
-            {
-                bisonLightPunch();
-                console.log('punch');
-                consecutivePunches++;
-            }
-        }
-
-
-     //   bisonLightPunch();
-  
-
-        // if (!bisonAttacking) {
-        //    enemyBison.body.velocity.x = 0;
-        //    enemyBison.animations.play('standing', 7, true);
-        //}
-       
-    }
 }
 
 
@@ -387,28 +375,32 @@ function enemyAI()
 
 function inputHandlers() {
 
-    
-
-
     //TODO: Neutral jump:
     //   playerKen.body.velocity.y = -50;
     //    playerKen.animations.play('neutralJump', 7, false);
 
     if (cursors.left.isDown && cursors.down.isUp) {
+        lastLeftInput = this.game.time.totalElapsedSeconds();
         walkLeft();
     }
     else if (cursors.right.isDown) {
+        lastRightInput = this.game.time.totalElapsedSeconds();
         walkRight();
+
     }
     else if (cursors.down.isDown) {
+        lastDownInput = this.game.time.totalElapsedSeconds();
         crouch();
     }
     else if (mediumPunchInput.isDown) {
+        lastMediumPunchInput = this.game.time.totalElapsedSeconds();
         mediumPunch();
     }
     else if (lightPunchInput.isDown) {
+        lastLightPunchInput = this.game.time.totalElapsedSeconds();
         lightPunch();
-            }
+
+    }
     else {
         standing();
     }
@@ -418,8 +410,7 @@ function inputHandlers() {
 
 
 
-function standing()
-{
+function standing() {
     playerKen.damage = 0;
     if (!kenAttacking) {
 
@@ -466,27 +457,23 @@ function crouch() {
     }
 }
 
-function lightPunch()
-{
+function lightPunch() {
+
     playerKen.damage = 1;
-    playerKen.body.setRectangle(55, 80, -18); //Increase the hitbox.
-    //IMPORTANT: Whenever re setting the rectangle, must call setCollionGroup
-    playerKen.body.setCollisionGroup(kenCollisionGroup);
-    playerKen.body.collides(mBisonCollisionGroup, hitEnemy, this);
+    playerKen.body.setSize(lightPunchWidthKen, standingHitBoxHeightKen); //Increase the hitbox.
+
 
     playerKen.body.velocity.x = 0;
 
     playerKen.body.static = true;
+
+
     //console.log('light');
     kenAttacking = true;
     playerKen.animations.play('standingLightPunch', 7, false).onComplete.add(function () {
         //reset the graphics back
-      
-        playerKen.body.setRectangle(35, 80, -18);
 
-        playerKen.body.setCollisionGroup(kenCollisionGroup);
-        playerKen.body.collides(mBisonCollisionGroup, hitEnemy, this);
-
+        playerKen.body.setSize(standingHitBoxWidthKen, standingHitBoxHeightKen);
 
 
         kenAttacking = false;
@@ -495,39 +482,32 @@ function lightPunch()
         playerKen.body.static = false;
         //console.log('inside oncomplete lightpunch')
     }, this);
-}
-     
-function mediumPunch() {
-    playerKen.damage = 3 ;
-    playerKen.body.setRectangle(70, 80, -18); //Increase the hitbox.
- 
 
-    //IMPORTANT: Whenever re setting the rectangle, must call setCollionGroup
-    playerKen.body.setCollisionGroup(kenCollisionGroup);
-    playerKen.body.collides(mBisonCollisionGroup, hitEnemy, this);
+
+}
+
+function mediumPunch() {
+    playerKen.damage = 3;
+
+    playerKen.body.setSize(mediumPunchWidthKen, standingHitBoxHeightKen); //Increase the hitbox.
     playerKen.body.velocity.x = 0;
     playerKen.body.static = true;
 
-  
-    //console.log('medium');
     kenAttacking = true;
     kenAnimation = playerKen.animations.play('standingMediumPunch', 10, false).onComplete.add(function () {
-      
+
         //reset the graphics back
-        playerKen.body.setRectangle(35, 80, -18);
-      
-        playerKen.body.setCollisionGroup(kenCollisionGroup);
-        playerKen.body.collides(mBisonCollisionGroup, hitEnemy, this);
+        playerKen.body.setSize(standingHitBoxWidthKen, standingHitBoxHeightKen);
+
         kenAttacking = false;
 
         playerKen.body.velocity.x = 0;
         playerKen.animations.play('standing', 7, true);
         playerKen.body.static = false;
-    
-      
+
+
         //console.log('punching');
     }, this);
 }
 
 
-    
