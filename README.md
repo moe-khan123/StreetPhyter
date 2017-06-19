@@ -10,15 +10,15 @@ Initially using Street Fighter 2 and Street Fighter Alpha 3 sprites, I plan to i
 
 
 Controls: 
--Arrow keys to walk and crouch. 
--Q to Light punch
--W to Medium punch
+- Arrow keys to walk and crouch. 
+- Q to Light punch
+- W to Medium punch
 
--A to Light Kick
--S to Medium Kick
--D to Hard Kick
+- A to Light Kick
+- S to Medium Kick
+- D to Hard Kick
 
--Down -> Forward -> Q (Light Punch) to hadouken
+- Down -> Forward -> Q (Light Punch) to hadouken
 
 What's done so far:
 - Ability to walk forward, backward, crouch, punch and kick.
