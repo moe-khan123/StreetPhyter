@@ -1,3 +1,6 @@
+//TODO: 
+//1) Jump Mechanics: https://phaser.io/examples/v2/arcade-physics/platformer-basics
+
 var game = new Phaser.Game(621, 224, Phaser.CANVAS, 'phaser-example',
     {
         preload: preload,
@@ -6,22 +9,25 @@ var game = new Phaser.Game(621, 224, Phaser.CANVAS, 'phaser-example',
         render: render
     });
 
-
 function render() {
 
-    //game.debug.body(playerKen);
-    //game.debug.body(enemyBison);
-
+    game.debug.body(playerKen);
+    game.debug.body(enemyBison);
+    if (bullet != null)
+        {
+        game.debug.body(bullet);
+         }
 
 
 }
 
 function preload() {
 
-    game.load.spritesheet('kennewsprites', 'src/sprites/kennewsprites.png', 76, 101, 48);
+    game.load.spritesheet('kennewsprites', 'src/sprites/kennewsprites.png', 76, 101, 63);
     game.load.spritesheet('mbisonsprites', 'src/sprites/mbisonspritesheet.png', 65, 95, 48);
     game.load.image('blankaLevel', 'src/sprites/sf2ww-blanka.gif');
     game.load.image('bisonEnemy', 'src/sprites/bison enemy.png');
+    game.load.image('hadouken', 'src/sprites/hadouken.png');
 
 }
 
@@ -55,8 +61,6 @@ var bisonBlocking;
 
 //Enemy Code:
 var enemyBison;
-var time_til_spawn;
-var last_spawn_time;
 
 //Hitbox
 var hitBoxes;
@@ -85,24 +89,25 @@ var standingHitBoxHeightBison;
 var lightPunchWidthBison;
 var mediumPunchWidhBison;
 
-//Misc: 
+//Input History: 
 var inputString;
-var inputArray;
 var lastLeftInput;
 var lastRightInput;
 var lastDownInput;
 var lastLightPunchInput;
 var lastMediumPunchInput;
 
+//fireball:
+var bullets;
+var bullet;
+
+
 
 function create() {
     inputString = "";
-    inputArray = [];
 
     healthKen = 100;
     healthBison = 100;
-    console.log(healthBison);
-
 
     kenIdle = true;
     kenAttacking = false;
@@ -130,12 +135,24 @@ function create() {
     inputDeclarations();
 
 
+    bullets = game.add.group();
+   
+    bullets.enableBody = true;
+    bullets.physicsBodyType = Phaser.Physics.ARCADE;
+    bullets.createMultiple(30, 'hadouken', 0, false);
+    bullets.setAll('anchor.x', 0.5);
+    bullets.setAll('anchor.y', 0.5);
+    bullets.setAll('outOfBoundsKill', true);
+    bullets.setAll('checkWorldBounds', true);
+    //console.log(bullets);
+    //
+ 
+
 
     game.physics.startSystem(Phaser.Physics.ARCADE); //game.physics.startSystem(Phaser.Physics.P2JS);
     game.physics.arcade.enable([playerKen, enemyBison], Phaser.Physics.ARCADE, true);
     playerKen.body.setSize(standingHitBoxWidthKen, standingHitBoxHeightKen);
-    enemyBison.body.setSize(standingHitBoxWidthBison, standingHitBoxHeightBison);
-
+    enemyBison.body.setSize(standingHitBoxWidthBison, standingHitBoxHeightBison, 20);
 
 }
 
@@ -143,7 +160,14 @@ function create() {
 
 
 function hitEnemy(body1, body2) {
+    console.log(body1.key);
+    console.log(body2);
 
+    if (body1.key == "hadouken")
+    {
+        body1.destroy();
+        healthBison = healthBison - body1.damage;
+    }
 
     if (kenAttacking) {
         healthBison = healthBison - body1.damage;
@@ -156,7 +180,6 @@ function hitEnemy(body1, body2) {
         console.log('Ken Health: ' + healthKen);
     }
     else {
-        console.log('else statement');
         enemyBison.body.velocity.x = 0;
     }
 
@@ -175,6 +198,7 @@ function hitEnemy(body1, body2) {
 
 }
 
+var hadoukenSprite;
 function renderSprites() {
 
 
@@ -182,6 +206,7 @@ function renderSprites() {
     backgroundImage.smoothed = false;
     enemyBison = game.add.sprite(500, YValueBlankaLevel, 'mbisonsprites');
     playerKen = game.add.sprite(300, YValueBlankaLevel, 'kennewsprites');
+  //  hadoukenSprite = game.add.image(300, YValueBlankaLevel, 'hadouken');
 
 }
 
@@ -192,10 +217,25 @@ function playerKenSpritesLoad() {
     playerKen.animations.add('walkingbackward', [8, 9, 10, 11, 12, 13]);
 
     //Standing Punches:
-
-    playerKen.animations.add('standingLightPunch', [25, 26, 27]);
+    playerKen.animations.add('standingLightPunch', [25, 26, 27]); 
     playerKen.animations.add('standingMediumPunch', [27, 28, 29, 30]);
+   playerKen.animations.add('standingFiercePunch', [31, 32, 33, 34,35]);
 
+//jump: 
+  playerKen.animations.add('neutralJump', [36, 37, 38, 39]);
+
+
+//hadouken
+   playerKen.animations.add('hadouken', [42, 43, 44, 45]);
+
+
+//light kick:
+   playerKen.animations.add('standingLightKick', [46, 47, 48, 49]);
+   playerKen.animations.add('standingMediumKick', [50, 51, 52, 53, 54]);
+  playerKen.animations.add('standingFierceKick', [55, 56, 57, 58, 59,60]);
+
+//got hit standing
+  playerKen.animations.add('gotHitStanding', [61, 62, 63]);
 
 
     //Crouching:
@@ -229,8 +269,6 @@ function inputDeclarations() {
     lightKickInput = game.input.keyboard.addKey(Phaser.Keyboard.A);
     mediumKickInput = game.input.keyboard.addKey(Phaser.Keyboard.S);
     fierceKickInput = game.input.keyboard.addKey(Phaser.Keyboard.D);
-
-
 }
 
 
@@ -258,59 +296,63 @@ function inputTracker() {
     }
     else if (lightPunchInput.downDuration(1)) {
         inputString += "[LP]";
-
     }
 
 }
-var hadoukenTime = [];
+
 function specialMovesTracker() {
-    if (inputString.includes("DR[LP]")) {
-        console.log((lastLightPunchInput - lastDownInput));
-        if ((lastLightPunchInput - lastDownInput) < 0.44425) {
-            console.log('hadouken');
-            inputString = "";
+    if (inputString.includes("DR[LP]")) {     
+        if ((lastLightPunchInput - lastDownInput) < 0.44425) {                   
+              
+                    inputString = "";
+                    if (bullets.countLiving() == 0) //Only one hadouken on the screen at a time.
+{
+                    //getFirstExists(exists, createIfNull, x, y, key, frame) 
+                    //If this Sprite is using part of a sprite sheet or texture atlas you can specify the exact frame to use by giving a string or numeric index.
+                    bullet = bullets.getFirstExists(false);
+                    console.log('bullet');
+                    console.log(bullet);
+                    bullet.damage = 0.7;
+                    bullet.body.setCircle(23, 10, 5);
+                    bullet.reset(playerKen.position.x + playerKen.width, playerKen.position.y);
+                    game.physics.arcade.moveToObject(bullet, enemyBison, 200);
+}
+                  
+                 
+               
+          
         }
         else {
             inputString = "";
-            console.log('Do not do hadouken, users inputs are too slow.');
+        //    console.log('Do not do hadouken, users inputs are too slow.');
         }
     }
     else if (inputString.includes("DRD[LP]")) //Shoryuken (Dragon Punch)
     {
-
-
         if ((lastDownInput - lastLightPunchInput) < 1.5) {
-            console.log('shoryuken');
+            //console.log('shoryuken');
             inputString = "";
         }
     }
     else {
-        console.log("No Special moves detected.");
+       // console.log("No Special moves detected.");
     }
-
 }
-
-
 
 function bisonStanding() {
     enemyBison.damage = 0;
     if (!bisonAttacking) {
-
         enemyBison.body.velocity.x = 0;
         enemyBison.animations.play('standing', 7, true);
-
+        enemyBison.body.setSize(standingHitBoxWidthBison, standingHitBoxHeightBison);
     }
 }
 
-
-
 function bisonWalkingForward() {
     if (!bisonAttacking) {
-
         game.physics.arcade.moveToObject(enemyBison, playerKen.position);
         enemyBison.animations.play('walkingforward', 7, true);
         enemyBison.body.setSize(standingHitBoxWidthBison, standingHitBoxHeightBison);
-
     }
 }
 
@@ -318,8 +360,6 @@ function bisonWalkingBackward() {
     if (!bisonAttacking) {
         enemyBison.body.velocity.x = 1000;
         enemyBison.animations.play('walkingbackward', 7, true);
-
-
     }
 }
 
@@ -330,29 +370,28 @@ function bisonLightPunch() {
 
     enemyBison.body.velocity.x = 0;
 
-    //console.log('light');
+
     bisonAttacking = true;
     enemyBison.animations.play('standingLightPunch', 10, false).onComplete.add(function () {
         console.log('the reset');
-        enemyBison.body.setSize(standingHitBoxWidthBison, standingHitBoxHeightBison, 0); //Putting it back to 0 after I have changed it to -20.
+        enemyBison.body.setSize(standingHitBoxWidthBison, standingHitBoxHeightBison, 0); 
         bisonAttacking = false;
         enemyBison.body.velocity.x = 0;
         enemyBison.animations.play('standing', 7, true);
         enemyBison.body.static = false;
-        //console.log('inside oncomplete lightpunch')
+
     }, this);
 }
 
 
-
-
-
-var consecutivePunches = 0;
-
 function enemyAI() {
 
 
+    //Note: Leave this uncommented, this is the collision detection. 
     var isColliding = game.physics.arcade.collide(playerKen, enemyBison, hitEnemy, null, this);
+    var hadoukenColliding = game.physics.arcade.collide(bullet, enemyBison, hitEnemy, null, this);
+    //console.log(hadoukenColliding);
+  //  var isCollidingHadouken = game.physics.arcade.collide(hadoukenSprite, enemyBison, hitEnemy, null, this);
 
     //   console.log(Phaser.Rectangle.intersects(playerKen.position, enemyBison.position));
     // if (!(Phaser.Rectangle.intersects(playerKen, enemyBison))) {
@@ -364,9 +403,6 @@ function enemyAI() {
     //        bisonLightPunch();
 
     //    }
-
-
-
 
 }
 
@@ -394,12 +430,27 @@ function inputHandlers() {
     }
     else if (mediumPunchInput.isDown) {
         lastMediumPunchInput = this.game.time.totalElapsedSeconds();
-        mediumPunch();
+        standingHits(3, mediumPunchWidthKen, standingHitBoxHeightKen, 0, 0, 'standingMediumPunch', 10);
     }
     else if (lightPunchInput.isDown) {
         lastLightPunchInput = this.game.time.totalElapsedSeconds();
-        lightPunch();
-
+        standingHits(3, lightPunchWidthKen, standingHitBoxHeightKen, 0, 0, 'standingLightPunch', 7);
+    }
+    else if (fiercePunchInput.isDown)
+    {
+        
+    }
+    else if (lightKickInput.isDown)
+    {
+        standingHits(5, 60, 60, 0, 0, 'standingLightKick', 12);
+    }
+    else if (mediumKickInput.isDown)
+    {
+        standingHits(5, 60, 60, 0, 0, 'standingMediumKick', 12);
+    }
+    else if (fierceKickInput.isDown)
+    {
+        standingHits(5,65, 60, 0, 0, 'standingFierceKick', 15);
     }
     else {
         standing();
@@ -407,33 +458,24 @@ function inputHandlers() {
 }
 
 
-
-
-
 function standing() {
     playerKen.damage = 0;
     if (!kenAttacking) {
-
         playerKen.body.velocity.x = 0;
         playerKen.animations.play('standing', 7, true);
-        //console.log('standing');
-
     }
 }
 
 function walkLeft() {
-    if (!kenAttacking) {
-        //console.log('left');
+    if (!kenAttacking) {     
         playerKen.body.velocity.x = -100;
         playerKen.animations.play('walkingbackward', 7, true);
     }
 }
 
 function walkRight() {
-    if (!kenAttacking) {
-        //console.log('right');
+    if (!kenAttacking) {   
         kenIdle = false;
-
         playerKen.body.velocity.x = 100;
         playerKen.animations.play('walkingforward', 7, true);
     }
@@ -442,72 +484,34 @@ function walkRight() {
 function crouch() {
     if (cursors.left.isDown) {
         kenIdle = true;
-        kenBlocking = true;
-        //console.log('crouch block');
+        kenBlocking = true;     
         playerKen.animations.play('crouching', 7, true);
         playerKen.body.velocity.x = 0;
     }
     else {
         if (!kenAttacking) {
-            kenIdle = true; //kenIdle is true whether u are crouching down or letting go of the key
-            //console.log('down');
+            kenIdle = true;         
             playerKen.animations.play('crouching', 7, true);
             playerKen.body.velocity.x = 0;
         }
     }
 }
 
-function lightPunch() {
-
-    playerKen.damage = 1;
-    playerKen.body.setSize(lightPunchWidthKen, standingHitBoxHeightKen); //Increase the hitbox.
-
-
+function standingHits(damage, hitboxWidth, hitboxHeight, offsetX, offsetY, animationPlayString, frameRate)
+{
+    playerKen.damage = damage;
+    playerKen.body.setSize(hitboxWidth, hitboxHeight); //Increase the hitbox.
     playerKen.body.velocity.x = 0;
-
     playerKen.body.static = true;
-
-
-    //console.log('light');
     kenAttacking = true;
-    playerKen.animations.play('standingLightPunch', 7, false).onComplete.add(function () {
-        //reset the graphics back
-
+    playerKen.animations.play(animationPlayString, frameRate, false).onComplete.add(function () {
         playerKen.body.setSize(standingHitBoxWidthKen, standingHitBoxHeightKen);
-
-
         kenAttacking = false;
         playerKen.body.velocity.x = 0;
         playerKen.animations.play('standing', 7, true);
         playerKen.body.static = false;
-        //console.log('inside oncomplete lightpunch')
-    }, this);
-
-
-}
-
-function mediumPunch() {
-    playerKen.damage = 3;
-
-    playerKen.body.setSize(mediumPunchWidthKen, standingHitBoxHeightKen); //Increase the hitbox.
-    playerKen.body.velocity.x = 0;
-    playerKen.body.static = true;
-
-    kenAttacking = true;
-    kenAnimation = playerKen.animations.play('standingMediumPunch', 10, false).onComplete.add(function () {
-
-        //reset the graphics back
-        playerKen.body.setSize(standingHitBoxWidthKen, standingHitBoxHeightKen);
-
-        kenAttacking = false;
-
-        playerKen.body.velocity.x = 0;
-        playerKen.animations.play('standing', 7, true);
-        playerKen.body.static = false;
-
-
-        //console.log('punching');
     }, this);
 }
+
 
 
