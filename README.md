@@ -7,22 +7,30 @@ How often do we see a good fighting game for the browser? My intention is to cre
 
 Initially using Street Fighter 2 and Street Fighter Alpha 3 sprites, I plan to incorporate concepts from several fighting games into this game.
 
+
+
 Controls: 
 -Arrow keys to walk and crouch. 
 -Q to Light punch
 -W to Medium punch
 
+-A to Light Kick
+-S to Medium Kick
+-D to Hard Kick
+
+-Down -> Forward -> Q (Light Punch) to hadouken
+
 What's done so far:
-- Ability to walk forward, backward, crouch.
+- Ability to walk forward, backward, crouch, punch and kick.
 - Simple Enemy AI has been coded, but commented out for the time being. 
-- Special Moves Input Detection has been made (Shoryuken Motion, Hadouken Motion), although the actual move has not been programmed yet. 
-- Damage and health has been programmed in.
+- Barebones hadouken functionality.
+- Damage and health has been programmed in. (No user interface to display the health so far)
 
 To Do in the near term:
-- Update Ken's sprites to include all his moves. Including neutral jump, back and forwards jump, hadouken, tatsu and shoryuken.
+- Tatsu, shoryuken, jump forward and backward sprites update.
 - Ability to neutral jump, jump forward and backward.
-- Special Moves implementation
-- a complex hitbox/hurtbox
+- Special Moves implementation for Tatsu and Shoryuken.
+- a sophisticated hitbox and hurtbox system.
 - Blockstun 
 
 
