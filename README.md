@@ -1,16 +1,31 @@
 # StreetPhyter
 An open source HTML5 Fighting game built with the Phaser engine!
 
+Latest build can be played here: https://moe-khan123.github.io/
+
 How often do we see a good fighting game for the browser? My intention is to create a good, functionable fighting game engine!
 
-June 8th 2017: So far, ability to walk backwards, forwards, crouch, crouch block, standing light punch and standing medium punch is working. 
-Collission detection functionable between opponent and Character
-Simple AI has been built (walk towards player and punch)
-Health and damage has been coded in, just need to put in the user interface of the health bars.
+Initially using Street Fighter 2 and Street Fighter Alpha 3 sprites, I plan to incorporate concepts from several fighting games into this game.
 
-TODO in the upcoming commits: 
-- Add in Ken's sprites for hard punch and the kick buttons
-- Implement functionality of the kick buttons
-- Block stun when punch is landed, and recovery frames when a punch or kick has been made.
-- V-Trigger meter and Critical Art meter similar to Street Fighter 5
-- A more smarter AI system
+Controls: 
+-Arrow keys to walk and crouch. 
+-Q to Light punch
+-W to Medium punch
+
+What's done so far:
+- Ability to walk forward, backward, crouch.
+- Simple Enemy AI has been coded, but commented out for the time being. 
+- Special Moves Input Detection has been made (Shoryuken Motion, Hadouken Motion), although the actual move has not been programmed yet. 
+- Damage and health has been programmed in.
+
+To Do in the near term:
+- Update Ken's sprites to include all his moves. Including neutral jump, back and forwards jump, hadouken, tatsu and shoryuken.
+- Ability to neutral jump, jump forward and backward.
+- Special Moves implementation
+- a complex hitbox/hurtbox
+- Blockstun 
+
+
+If you want to use your own sprites for this game, feel free to contribute and I'll be glad to put you in the credits section!
+
+
