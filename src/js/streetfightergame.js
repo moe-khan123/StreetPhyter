@@ -14,6 +14,7 @@ function render() {
     if (bullet != null) {
         game.debug.body(bullet);
     }
+   
 
 
 }
@@ -269,7 +270,7 @@ function inputDeclarations() {
 
 
 function update() {
-
+    console.log(playerKen.animations.currentAnim.frame);
     inputHandlers();
     enemyAI();
     inputTracker();
@@ -502,6 +503,7 @@ function crouch() {
     }
 }
 
+
 function standingHits(damage, hitboxWidth, hitboxHeight, offsetX, offsetY, animationPlayString, frameRate) {
     playerKen.damage = damage;
     playerKen.body.setSize(hitboxWidth, hitboxHeight); //Increase the hitbox.
@@ -515,4 +517,5 @@ function standingHits(damage, hitboxWidth, hitboxHeight, offsetX, offsetY, anima
         playerKen.animations.play('standing', 7, true);
         playerKen.body.static = false;
     }, this);
+
 }
