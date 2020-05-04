@@ -1,3 +1,10 @@
+**************NOTE*************************
+May 2nd, 2020: Extremely sorry guys, as you could tell this project has not been maintained for about 3 years now due to different priorities in life. This was a little side project, and many of you who will be forking this may see that my javascript and game dev coding is not very strong. Feel free to fork at will, I look forward to any developments on this!
+
+Cheers.
+
+
+
 # StreetPhyter
 An open source HTML5 Fighting game built with the Phaser engine!
 
